@@ -19,6 +19,10 @@
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
         .main-card { max-width: 600px; margin: 50px auto; border-radius: 15px; border: none; }
         .btn-action { margin-top: 10px; margin-right: 5px; }
+        body.dark-mode { background: #1a1a1a; color: white; }
+    .dark-mode .card { background: #2d2d2d; color: white; border: 1px solid #444; }
+    .dark-mode .form-control, .dark-mode .form-select { background: #333; color: white; border-color: #555; }
+    .dark-mode .bg-light { background: #333 !important; color: #ddd; }
     </style>
 </head>
 <body>
@@ -58,7 +62,33 @@
         </div>
     </div>
 
+    <button onclick="toggleDarkMode()" class="btn btn-sm btn-dark float-end">🌙 Mode</button>
+
+<div class="mt-5">
+    <h5 class="text-muted"><i class="fas fa-history"></i> Oxirgi tarjimalar:</h5>
+    <ul class="list-group shadow-sm">
+        {% for item in history %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <small>{{ item.original_text|truncatechars:30 }}</small>
+            <i class="fas fa-arrow-right mx-2 text-primary"></i>
+            <small class="fw-bold">{{ item.translated_text|truncatechars:30 }}</small>
+            <span class="badge bg-secondary rounded-pill">{{ item.language }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
     <script>
+        function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDark);
+    }
+    // Sahifa yuklanganda holatni tekshirish
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+    }
+
         function speakText() {
             const text = document.getElementById('resultText').innerText;
             const utterance = new SpeechSynthesisUtterance(text);
