@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <meta name="google-site-verification" content="7pses4nPlPxbqpIa7A7BQzBUIvfPnM92ARztB3JTsN8" />
 
     <title>SMB Translator - Onlayn Tarjimon</title>
@@ -16,18 +15,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
-        .main-card { max-width: 600px; margin: 50px auto; border-radius: 15px; border: none; }
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; transition: 0.3s; }
+        .main-card { max-width: 650px; margin: 30px auto; border-radius: 15px; border: none; }
         .btn-action { margin-top: 10px; margin-right: 5px; }
-        body.dark-mode { background: #1a1a1a; color: white; }
-    .dark-mode .card { background: #2d2d2d; color: white; border: 1px solid #444; }
-    .dark-mode .form-control, .dark-mode .form-select { background: #333; color: white; border-color: #555; }
-    .dark-mode .bg-light { background: #333 !important; color: #ddd; }
+        
+        /* Dark Mode Styles */
+        body.dark-mode { background: #121212; color: #e0e0e0; }
+        .dark-mode .card { background: #1e1e1e; color: white; border: 1px solid #333; }
+        .dark-mode .form-control, .dark-mode .form-select { background: #2d2d2d; color: white; border-color: #444; }
+        .dark-mode .bg-light { background: #2d2d2d !important; color: #bbb; border-color: #444 !important; }
+        .dark-mode .list-group-item { background: #1e1e1e; color: #ddd; border-color: #333; }
+        .dark-mode .text-muted { color: #aaa !important; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="card main-card shadow p-4">
+        <div class="card main-card shadow-lg p-4">
+            <button onclick="toggleDarkMode()" class="btn btn-outline-secondary btn-sm float-end" id="modeBtn">
+                <i class="fas fa-moon"></i> Tun
+            </button>
+
             <h2 class="text-center mb-4 text-primary"><i class="fas fa-language"></i> SMB Translator</h2>
             
             <form method="POST">
@@ -46,48 +53,63 @@
                     </select>
                 </div>
                 
-                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Tarjima qilish</button>
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                    <i class="fas fa-sync-alt"></i> Tarjima qilish
+                </button>
             </form>
 
             {% if translated %}
-            <div class="mt-4 p-3 bg-light border rounded">
-                <h5 class="text-muted">Natija:</h5>
+            <div class="mt-4 p-3 bg-light border rounded position-relative">
+                <h6 class="text-muted small uppercase">Natija:</h6>
                 <p id="resultText" class="fs-5">{{ translated }}</p>
                 <hr>
-                <button onclick="speakText()" class="btn btn-outline-success btn-sm btn-action"><i class="fas fa-volume-up"></i> Eshitish</button>
-                <button onclick="copyText()" class="btn btn-outline-secondary btn-sm btn-action"><i class="fas fa-copy"></i> Nusxalash</button>
-                <span id="copyMsg" class="text-success small" style="display: none;">Nusxalandi!</span>
+                <button onclick="speakText()" class="btn btn-outline-success btn-sm btn-action"><i class="fas fa-volume-up"></i></button>
+                <button onclick="copyText()" class="btn btn-outline-secondary btn-sm btn-action"><i class="fas fa-copy"></i></button>
+                <span id="copyMsg" class="text-success small ms-2" style="display: none;">Nusxalandi!</span>
             </div>
             {% endif %}
+
+            <div class="mt-5">
+                <h6 class="text-muted mb-3"><i class="fas fa-history"></i> Tarix:</h6>
+                <div class="list-group list-group-flush border-top">
+                    {% for item in history %}
+                    <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                        <div class="text-truncate me-2" style="max-width: 40%;">
+                            <small class="text-muted d-block small">Asl matn:</small>
+                            <span class="small">{{ item.original_text }}</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-primary small"></i>
+                        <div class="text-truncate ms-2" style="max-width: 40%;">
+                            <small class="text-muted d-block small">Tarjima:</small>
+                            <span class="fw-bold small">{{ item.translated_text }}</span>
+                        </div>
+                        <span class="badge bg-light text-dark border ms-2">{{ item.language }}</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-center text-muted small mt-2">Hozircha tarix mavjud emas.</p>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 
-    <button onclick="toggleDarkMode()" class="btn btn-sm btn-dark float-end">🌙 Mode</button>
-
-<div class="mt-5">
-    <h5 class="text-muted"><i class="fas fa-history"></i> Oxirgi tarjimalar:</h5>
-    <ul class="list-group shadow-sm">
-        {% for item in history %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <small>{{ item.original_text|truncatechars:30 }}</small>
-            <i class="fas fa-arrow-right mx-2 text-primary"></i>
-            <small class="fw-bold">{{ item.translated_text|truncatechars:30 }}</small>
-            <span class="badge bg-secondary rounded-pill">{{ item.language }}</span>
-        </li>
-        {% endfor %}
-    </ul>
-</div>
-
     <script>
         function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
-        const isDark = document.body.classList.contains('dark-mode');
-        localStorage.setItem('darkMode', isDark);
-    }
-    // Sahifa yuklanganda holatni tekshirish
-    if (localStorage.getItem('darkMode') === 'true') {
-        document.body.classList.add('dark-mode');
-    }
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            updateModeBtn(isDark);
+        }
+
+        function updateModeBtn(isDark) {
+            const btn = document.getElementById('modeBtn');
+            btn.innerHTML = isDark ? '<i class="fas fa-sun"></i> Kun' : '<i class="fas fa-moon"></i> Tun';
+        }
+
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            updateModeBtn(true);
+        }
 
         function speakText() {
             const text = document.getElementById('resultText').innerText;
