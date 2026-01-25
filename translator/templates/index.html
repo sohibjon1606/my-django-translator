@@ -2,26 +2,30 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>Django Tarjimon</title>
+    <title>Django Tarjimon PRO</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #f4f7f6; }
-        .main-card { max-width: 600px; margin: 50px auto; border-radius: 15px; }
+        body { background: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .main-card { max-width: 600px; margin: 50px auto; border-radius: 15px; border: none; }
+        .btn-action { margin-top: 10px; margin-right: 5px; }
+        .result-box { position: relative; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card main-card shadow p-4">
-            <h2 class="text-center mb-4 text-primary">Tarjimon PRO</h2>
+            <h2 class="text-center mb-4 text-primary"><i class="fas fa-language"></i> Tarjimon PRO</h2>
+            
             <form method="POST">
                 {% csrf_token %}
                 <div class="mb-3">
-                    <label class="form-label">Matnni kiriting:</label>
-                    <textarea name="text" class="form-control" rows="4">{{ original }}</textarea>
+                    <label class="form-label fw-bold">Matnni kiriting:</label>
+                    <textarea name="text" class="form-control" rows="4" placeholder="Tarjima uchun matn yozing...">{{ original }}</textarea>
                 </div>
                 
                 <div class="mb-3">
-                    <label class="form-label">Qaysi tilga:</label>
+                    <label class="form-label fw-bold">Qaysi tilga:</label>
                     <select name="lang" class="form-select">
                         <option value="uz" {% if lang == 'uz' %}selected{% endif %}>O'zbekcha</option>
                         <option value="en" {% if lang == 'en' %}selected{% endif %}>Inglizcha</option>
@@ -29,16 +33,59 @@
                     </select>
                 </div>
                 
-                <button type="submit" class="btn btn-primary w-100 py-2">Tarjima qilish</button>
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                    <i class="fas fa-sync-alt"></i> Tarjima qilish
+                </button>
             </form>
 
             {% if translated %}
-            <div class="mt-4 p-3 bg-light border rounded">
+            <div class="mt-4 p-3 bg-light border rounded result-box">
                 <h5 class="text-muted">Natija:</h5>
-                <p class="fs-5">{{ translated }}</p>
+                <p id="resultText" class="fs-5">{{ translated }}</p>
+                
+                <hr>
+                
+                <button onclick="speakText()" class="btn btn-outline-success btn-sm btn-action">
+                    <i class="fas fa-volume-up"></i> Eshitish
+                </button>
+                
+                <button onclick="copyText()" class="btn btn-outline-secondary btn-sm btn-action">
+                    <i class="fas fa-copy"></i> Nusxalash
+                </button>
+                <span id="copyMsg" class="text-success small" style="display: none;">Nusxalandi!</span>
             </div>
             {% endif %}
         </div>
     </div>
+
+    <script>
+        // Ovozli o'qish funksiyasi
+        function speakText() {
+            const text = document.getElementById('resultText').innerText;
+            const lang = "{{ lang }}"; 
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Tilni sozlash
+            if (lang === 'uz') {
+                utterance.lang = 'tr-TR'; // O'zbekcha uchun eng yaqin talaffuz
+            } else if (lang === 'ru') {
+                utterance.lang = 'ru-RU';
+            } else {
+                utterance.lang = 'en-US';
+            }
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Nusxalash funksiyasi
+        function copyText() {
+            const text = document.getElementById('resultText').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const msg = document.getElementById('copyMsg');
+                msg.style.display = 'inline';
+                setTimeout(() => { msg.style.display = 'none'; }, 2000);
+            });
+        }
+    </script>
 </body>
 </html>
