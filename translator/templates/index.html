@@ -2,26 +2,35 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>Django Tarjimon PRO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta name="google-site-verification" content="google_verification_kodi_shu_yerda" />
+
+    <title>SMB Translator - Onlayn Tarjimon</title>
+    <meta name="description" content="SMB Translator - Matnlarni o'zbek, ingliz va rus tillariga tez va sifatli tarjima qiling. Ovozli o'qish va nusxalash funksiyalari mavjud.">
+    <meta name="keywords" content="tarjimon, uzbek translator, onlayn tarjima, smb translator, django tarjimon">
+    <meta name="author" content="Sohibjon Maxamadjonov">
+    <meta name="robots" content="index, follow">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { background: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
         .main-card { max-width: 600px; margin: 50px auto; border-radius: 15px; border: none; }
         .btn-action { margin-top: 10px; margin-right: 5px; }
-        .result-box { position: relative; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card main-card shadow p-4">
-            <h2 class="text-center mb-4 text-primary"><i class="fas fa-language"></i> Tarjimon PRO</h2>
+            <h2 class="text-center mb-4 text-primary"><i class="fas fa-language"></i> SMB Translator</h2>
             
             <form method="POST">
                 {% csrf_token %}
                 <div class="mb-3">
                     <label class="form-label fw-bold">Matnni kiriting:</label>
-                    <textarea name="text" class="form-control" rows="4" placeholder="Tarjima uchun matn yozing...">{{ original }}</textarea>
+                    <textarea name="text" class="form-control" rows="4" placeholder="Tarjima uchun matn...">{{ original }}</textarea>
                 </div>
                 
                 <div class="mb-3">
@@ -33,25 +42,16 @@
                     </select>
                 </div>
                 
-                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
-                    <i class="fas fa-sync-alt"></i> Tarjima qilish
-                </button>
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Tarjima qilish</button>
             </form>
 
             {% if translated %}
-            <div class="mt-4 p-3 bg-light border rounded result-box">
+            <div class="mt-4 p-3 bg-light border rounded">
                 <h5 class="text-muted">Natija:</h5>
                 <p id="resultText" class="fs-5">{{ translated }}</p>
-                
                 <hr>
-                
-                <button onclick="speakText()" class="btn btn-outline-success btn-sm btn-action">
-                    <i class="fas fa-volume-up"></i> Eshitish
-                </button>
-                
-                <button onclick="copyText()" class="btn btn-outline-secondary btn-sm btn-action">
-                    <i class="fas fa-copy"></i> Nusxalash
-                </button>
+                <button onclick="speakText()" class="btn btn-outline-success btn-sm btn-action"><i class="fas fa-volume-up"></i> Eshitish</button>
+                <button onclick="copyText()" class="btn btn-outline-secondary btn-sm btn-action"><i class="fas fa-copy"></i> Nusxalash</button>
                 <span id="copyMsg" class="text-success small" style="display: none;">Nusxalandi!</span>
             </div>
             {% endif %}
@@ -59,25 +59,14 @@
     </div>
 
     <script>
-        // Ovozli o'qish funksiyasi
         function speakText() {
             const text = document.getElementById('resultText').innerText;
-            const lang = "{{ lang }}"; 
             const utterance = new SpeechSynthesisUtterance(text);
-            
-            // Tilni sozlash
-            if (lang === 'uz') {
-                utterance.lang = 'tr-TR'; // O'zbekcha uchun eng yaqin talaffuz
-            } else if (lang === 'ru') {
-                utterance.lang = 'ru-RU';
-            } else {
-                utterance.lang = 'en-US';
-            }
-            
+            const lang = "{{ lang }}";
+            utterance.lang = lang === 'uz' ? 'tr-TR' : (lang === 'ru' ? 'ru-RU' : 'en-US');
             window.speechSynthesis.speak(utterance);
         }
 
-        // Nusxalash funksiyasi
         function copyText() {
             const text = document.getElementById('resultText').innerText;
             navigator.clipboard.writeText(text).then(() => {
