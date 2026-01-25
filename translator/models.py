@@ -1,6 +1,8 @@
 from django.db import models
 
 class TranslationHistory(models.Model):
+    # Yangi maydon qo'shildi:
+    session_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
     original_text = models.TextField()
     translated_text = models.TextField()
     language = models.CharField(max_length=10)

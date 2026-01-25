@@ -3,8 +3,14 @@ from deep_translator import GoogleTranslator
 from .models import TranslationHistory
 
 def translate_app(request):
-    # Tarixni bazadan olish
-    history = TranslationHistory.objects.all().order_by('-created_at')[:5]
+    # 1. Foydalanuvchi uchun maxsus sessiya ID sini olish yoki yaratish
+    if not request.session.session_key:
+        request.session.create()
+    session_id = request.session.session_key
+
+    # 2. Faqat shu sessiyaga tegishli oxirgi 5 ta tarjimani olish
+    # Buning uchun modelga 'session_key' maydonini qo'shishimiz kerak (pastga qarang)
+    history = TranslationHistory.objects.filter(session_id=session_id).order_by('-created_at')[:5]
     
     original = ""
     translated = ""
@@ -17,14 +23,16 @@ def translate_app(request):
         if original:
             try:
                 translated = GoogleTranslator(source='auto', target=lang).translate(original)
-                # Bazaga saqlash
+                
+                # 3. Tarjimani sessiya ID si bilan birga saqlash
                 TranslationHistory.objects.create(
                     original_text=original,
                     translated_text=translated,
-                    language=lang
+                    language=lang,
+                    session_id=session_id  # Kim tarjima qilganini eslab qoladi
                 )
-                # Tarixni yangilash
-                history = TranslationHistory.objects.all().order_by('-created_at')[:5]
+                
+                history = TranslationHistory.objects.filter(session_id=session_id).order_by('-created_at')[:5]
             except Exception as e:
                 translated = f"Xatolik: {str(e)}"
                 
