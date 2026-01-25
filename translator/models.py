@@ -7,4 +7,4 @@ class TranslationHistory(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.original_text[:20]}... -> {self.language}"
+        return f"{self.original_text[:20]} -> {self.translated_text[:20]}"
